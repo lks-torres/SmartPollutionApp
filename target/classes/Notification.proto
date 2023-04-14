@@ -1,0 +1,41 @@
+syntax = "proto3";
+
+package ca.userAuthentication;
+
+option java_multiple_files = true;
+option java_package = "ca.notification";
+option java_outer_classname = "NotificationProto";
+
+service Notification {
+  rpc Subscription(SubscriptionRequest) returns (SubscriptionResponse) {}
+  rpc Notify(NotificationRequest) returns (NotificationResponse) {}
+  rpc DoNotification(RequestMessage) returns (ResponseMessage) {}
+}
+
+message SubscriptionRequest {
+  string subscriptionEmail = 1;
+}
+
+message SubscriptionResponse {
+  string subscriptionConfirmation = 1;
+}
+
+message NotificationRequest {
+  string notificationEmail = 1;
+}
+
+message NotificationResponse {
+  string notificationEmail = 1;
+  string notificationConfirmation = 2;
+  string status = 3;
+  int32 number_of_notifications = 4;
+}
+
+message RequestMessage {
+  string text = 1;
+  string password = 2;
+}
+
+message ResponseMessage {
+  int32 length = 1;
+}

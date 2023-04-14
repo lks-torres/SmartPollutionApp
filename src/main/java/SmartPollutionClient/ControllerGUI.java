@@ -2,6 +2,13 @@ package SmartPollutionClient;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
+
+import ca.notification.NotificationGrpc;
+import ca.notification.NotificationRequest;
+import ca.notification.NotificationResponse;
+import ca.notification.NotificationServer;
+import ca.notification.SubscriptionRequest;
+import ca.notification.SubscriptionResponse;
 import ca.userAuthentication.LoginRequest;
 import ca.userAuthentication.LoginResponse;
 import ca.userAuthentication.LoginStatus;
@@ -14,16 +21,21 @@ import ca.userAuthentication.userAuthenticationGrpc;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Random;
 import java.util.Scanner;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 	
 public class ControllerGUI implements ActionListener{
+	//Variables for userAuthentication services
 	private String userStatus = "Offline";
 	private String userEmail = "";
     private JTextField loginEmail, logoutEmail;
     private JPasswordField password, logout;
     private JLabel login;
+    
+    //Variables for notification services
+    private JTextField subscriptionEmail, notificationEmail;
 
     private JPanel getLoginService() {
         JPanel panel = new JPanel();
@@ -85,6 +97,54 @@ public class ControllerGUI implements ActionListener{
         return panel;
 
     }
+    private JPanel getSubscription() {
+        JPanel panel = new JPanel();
+        BoxLayout boxlayout = new BoxLayout(panel, BoxLayout.X_AXIS);
+
+        JLabel emailLabel = new JLabel("Email:");
+        panel.add(emailLabel);
+        panel.add(Box.createRigidArea(new Dimension(10, 0)));
+
+        subscriptionEmail = new JTextField(10);
+        panel.add(subscriptionEmail);
+        panel.add(Box.createRigidArea(new Dimension(10, 0)));
+
+        JButton subcribeButton = new JButton("Subscribe");
+        subcribeButton.addActionListener(this);
+        panel.add(subcribeButton);
+        panel.add(Box.createRigidArea(new Dimension(10, 0)));
+
+        JLabel subscribe = new JLabel("");
+        panel.add(subscribe);
+
+        panel.setLayout(boxlayout);
+
+        return panel;
+    }
+    private JPanel getNotification() {
+        JPanel panel = new JPanel();
+        BoxLayout boxlayout = new BoxLayout(panel, BoxLayout.X_AXIS);
+
+        JLabel emailLabel = new JLabel("Email:");
+        panel.add(emailLabel);
+        panel.add(Box.createRigidArea(new Dimension(10, 0)));
+
+        notificationEmail = new JTextField(10);
+        panel.add(notificationEmail);
+        panel.add(Box.createRigidArea(new Dimension(10, 0)));
+
+        JButton notificationButton = new JButton("Check Notification Received");
+        notificationButton.addActionListener(this);
+        panel.add(notificationButton);
+        panel.add(Box.createRigidArea(new Dimension(10, 0)));
+
+        JLabel notification = new JLabel("");
+        panel.add(notification);
+
+        panel.setLayout(boxlayout);
+
+        return panel;
+    }
 
 		public static void main(String[] args) {
 
@@ -112,6 +172,8 @@ public class ControllerGUI implements ActionListener{
 		    // Add the login and logout services to the main panel
 		    panel.add(getLoginService());
 		    panel.add(getLogoutService());
+		    panel.add(getSubscription());
+		    panel.add(getNotification());
 
 		    // Set size for the frame
 		    frame.setSize(300, 300);
@@ -210,5 +272,71 @@ public class ControllerGUI implements ActionListener{
 	                channel.shutdown();
 	            }
 	        }
-	    }
-	}
+	        else if (label.equals("Subscribe")) {
+	            // Get the email address from the subscriptionEmail text field
+	            String email = subscriptionEmail.getText();
+
+	            // Check if email field is empty
+	            if (email.trim().isEmpty()) {
+	                JOptionPane.showMessageDialog(null, "Email address cannot be blank");
+	                return;
+	            }
+
+	            // Establish channel
+	            ManagedChannel channel = ManagedChannelBuilder.forAddress("localhost", 8080).usePlaintext().build();
+
+	            try {
+	                // Create stub
+	                NotificationGrpc.NotificationBlockingStub notificationStub = NotificationGrpc.newBlockingStub(channel);
+
+	                // Prepare subscription request message
+	                SubscriptionRequest subscriptionRequest = SubscriptionRequest.newBuilder().setSubscriptionEmail(email).build();
+
+	                // Call the subscribe RPC and display a message indicating the subscription was successful
+	                SubscriptionResponse subscriptionResponse = notificationStub.subscription(subscriptionRequest);
+	                JOptionPane.showMessageDialog(null, subscriptionResponse.getSubscriptionConfirmation());
+
+	            } catch (Exception ex) {
+	                // Handle any exceptions that may occur
+	                System.err.println("Error: " + ex.getMessage());
+	            } finally {
+	                // Shutdown channel
+	                channel.shutdown();
+	            }
+	        }
+	        else if (label.equals("Check Notification Received")) {
+	            // Get the email address from the notificationEmail text field
+	            String email = notificationEmail.getText();
+
+	            // Establish channel
+	            ManagedChannel channel = ManagedChannelBuilder.forAddress("localhost", 8080).usePlaintext().build();
+
+	            try {
+	                // Create stub
+	                NotificationGrpc.NotificationBlockingStub notificationStub = NotificationGrpc.newBlockingStub(channel);
+
+	                // Check if email is subscribed
+	                SubscriptionRequest subscriptionRequest = SubscriptionRequest.newBuilder().setSubscriptionEmail(email).build();
+	                SubscriptionResponse subscriptionResponse = notificationStub.subscription(subscriptionRequest);
+	                String subscribedEmails = subscriptionResponse.getSubscriptionConfirmation();
+	                if (!subscribedEmails.contains(email)) {
+	                    JOptionPane.showMessageDialog(null, "Email not subscribed");
+	                    return;
+	                }
+
+	                // Generate random number of notifications between 0 and 12 (inclusive)
+	                int numNotifications = new Random().nextInt(13);
+
+	                // Display notification message
+	                JOptionPane.showMessageDialog(null, String.format("You have received %d notification(s), please check for email from notification@smartpollution.ie", numNotifications));
+
+	            } catch (Exception ex) {
+	                // Handle any exceptions that may occur
+	                System.err.println("Error: " + ex.getMessage());
+	            } finally {
+	                // Shutdown channel
+	                channel.shutdown();
+	            }
+	        }
+		}   
+}
