@@ -1,0 +1,50 @@
+syntax = "proto3";
+
+package ca.userAuthentication;
+
+option java_multiple_files = true;
+option java_package = "ca.userAuthentication";
+option java_outer_classname = "userAuthenticationProto";
+
+service userAuthentication {
+rpc Login(LoginRequest) returns (LoginResponse) {}
+rpc Logout(LogoutRequest) returns (LogoutResponse) {}
+rpc userAuthenticationDo(RequestMessage) returns (ResponseMessage) {}
+}
+
+message LoginRequest {
+string email = 1;
+string password = 2;
+}
+
+message LoginResponse {
+LoginStatus status = 1;
+string userStatus = 2;
+}
+
+message LogoutRequest {
+string userStatus = 1;
+}
+
+message LogoutResponse {
+LogoutStatus status = 1;
+}
+
+message RequestMessage {
+string text = 1;
+string password = 2;
+}
+
+message ResponseMessage {
+int32 length = 1;
+}
+
+enum LoginStatus {
+LOGGED_IN_SUCCESSFULLY = 0;
+INCORRECT_CREDENTIALS = 1;
+}
+
+enum LogoutStatus {
+LOGGED_OUT_SUCCESSFULLY = 0;
+INVALID_USERSTATUS = 1;
+}
