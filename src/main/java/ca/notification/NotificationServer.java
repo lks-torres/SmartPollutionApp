@@ -84,9 +84,8 @@ public class NotificationServer extends NotificationGrpc.NotificationImplBase {
     }
 
     private void printSubscribedEmails() {
-    	
+    	System.out.println("Subscribed Emails:");
         if(subscribedEmails.isEmpty()){
-        	System.out.println("Subscribed Emails:");
         	System.out.println("No subscribed emails yet.");
         }else {
             System.out.println("Subscribed Emails:");

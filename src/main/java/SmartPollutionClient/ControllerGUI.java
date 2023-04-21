@@ -9,6 +9,11 @@ import ca.notification.NotificationResponse;
 import ca.notification.NotificationServer;
 import ca.notification.SubscriptionRequest;
 import ca.notification.SubscriptionResponse;
+import ca.pollutionData.GetMonthIndexRequest;
+import ca.pollutionData.GetMonthIndexResponse;
+import ca.pollutionData.GetReadingsRequest;
+import ca.pollutionData.GetReadingsResponse;
+import ca.pollutionData.PollutionDataServiceGrpc;
 import ca.userAuthentication.LoginRequest;
 import ca.userAuthentication.LoginResponse;
 import ca.userAuthentication.LoginStatus;
@@ -25,6 +30,7 @@ import java.util.Random;
 import java.util.Scanner;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
+import io.grpc.StatusRuntimeException;
 	
 public class ControllerGUI implements ActionListener{
 	//Variables for userAuthentication services
@@ -33,6 +39,7 @@ public class ControllerGUI implements ActionListener{
     private JTextField loginEmail, logoutEmail;
     private JPasswordField password, logout;
     private JLabel login;
+    private JTextField pollutionArea, pollutionMonth, pollutionData;
     
     //Variables for notification services
     private JTextField subscriptionEmail, notificationEmail;
@@ -144,6 +151,41 @@ public class ControllerGUI implements ActionListener{
         panel.setLayout(boxlayout);
 
         return panel;
+    }    
+    private JPanel getPollutionData() {
+
+        JPanel panel = new JPanel();
+
+        BoxLayout boxlayout = new BoxLayout(panel, BoxLayout.X_AXIS);
+
+        JLabel areaLabel = new JLabel("Enter Area");
+        panel.add(areaLabel);
+        panel.add(Box.createRigidArea(new Dimension(10, 0)));
+        pollutionArea = new JTextField("", 10);
+        panel.add(pollutionArea);
+        panel.add(Box.createRigidArea(new Dimension(10, 0)));
+
+        JLabel monthLabel = new JLabel("Month");
+        panel.add(monthLabel);
+        panel.add(Box.createRigidArea(new Dimension(10, 0)));
+
+        pollutionMonth = new JTextField(10);
+        panel.add(pollutionMonth);
+        panel.add(Box.createRigidArea(new Dimension(10, 0)));
+
+        JButton button = new JButton("Get Data");
+        button.addActionListener(this);
+        panel.add(button);
+        panel.add(Box.createRigidArea(new Dimension(10, 0)));
+
+        pollutionData = new JTextField("", 10);
+        pollutionData.setEditable(false);
+        panel.add(pollutionData);
+
+        panel.setLayout(boxlayout);
+
+        return panel;
+
     }
 
 		public static void main(String[] args) {
@@ -174,6 +216,7 @@ public class ControllerGUI implements ActionListener{
 		    panel.add(getLogoutService());
 		    panel.add(getSubscription());
 		    panel.add(getNotification());
+		    panel.add(getPollutionData());
 
 		    // Set size for the frame
 		    frame.setSize(300, 300);
@@ -338,5 +381,73 @@ public class ControllerGUI implements ActionListener{
 	                channel.shutdown();
 	            }
 	        }
-		}   
+	        else if (label.equals("Get Data")) {
+	            System.out.println("Pollution Data Service to be invoked...");
+
+	            // Create a channel to connect to the server
+	            ManagedChannel channel = ManagedChannelBuilder.forAddress("localhost", 8080).usePlaintext().build();
+
+	            // Create a blocking stub for the Pollution Data Service
+	            PollutionDataServiceGrpc.PollutionDataServiceBlockingStub blockingStub = PollutionDataServiceGrpc.newBlockingStub(channel);
+
+	            // Prepare the request message to send
+	            String area = pollutionArea.getText();
+	            String monthName = pollutionMonth.getText();
+	            GetMonthIndexRequest indexRequest = GetMonthIndexRequest.newBuilder()
+	                    .setMonthName(monthName)
+	                    .build();
+
+	            // Retrieve the month index from the server
+	            GetMonthIndexResponse indexResponse = blockingStub.getMonthIndex(indexRequest);
+	            int month = indexResponse.getMonthIndex();
+	            if (month == -1) {
+	                pollutionData.setText("Invalid month entered");
+	                return;
+	            }
+	            GetReadingsRequest request = GetReadingsRequest.newBuilder()
+	                    .setArea(area)
+	                    .setMonth(month)
+	                    .build();
+
+	            // Retrieve the response from the server
+	            GetReadingsResponse response;
+	            try {
+	                response = blockingStub.getReadings(request);
+	            } catch (StatusRuntimeException e1) {
+	                pollutionData.setText("Error communicating with server: " + e1.getStatus().getDescription());
+	                return;
+	            }
+
+	            // Display the pollution data in the UI
+	            float airPollution = 0.0f;
+	            float waterPollution = 0.0f;
+	            switch (area) {
+	                case "Dublin":
+	                    airPollution = response.getDublinAirPollution();
+	                    waterPollution = response.getDublinWaterPollution();
+	                    break;
+	                case "Cork":
+	                    airPollution = response.getCorkAirPollution();
+	                    waterPollution = response.getCorkWaterPollution();
+	                    break;
+	                default:
+	                    pollutionData.setText("Invalid area entered");
+	                    return;
+	            }
+	            
+	            // Create a new text area to display the pollution data
+	            JTextArea responseTextArea = new JTextArea("Air Pollution: " + airPollution + ", Water Pollution: " + waterPollution);
+	            responseTextArea.setEditable(false);
+	            responseTextArea.setLineWrap(true);
+	            responseTextArea.setWrapStyleWord(true);
+	            
+	            // Add the response text area to a scroll pane and display it in a separate dialog box
+	            JScrollPane scrollPane = new JScrollPane(responseTextArea);
+	            scrollPane.setPreferredSize(new Dimension(400, 200));
+	            JOptionPane.showMessageDialog(null, scrollPane, "Pollution Data Response", JOptionPane.PLAIN_MESSAGE);
+
+	            // Close the channel
+	            channel.shutdown();
+	        }
+		}
 }
