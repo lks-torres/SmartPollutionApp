@@ -58,21 +58,21 @@ public final class NotificationProto {
       "onEmail\030\001 \001(\t\"8\n\024SubscriptionResponse\022 \n" +
       "\030subscriptionConfirmation\030\001 \001(\t\"0\n\023Notif" +
       "icationRequest\022\031\n\021notificationEmail\030\001 \001(" +
-      "\t\"\204\001\n\024NotificationResponse\022\031\n\021notificati" +
-      "onEmail\030\001 \001(\t\022 \n\030notificationConfirmatio" +
-      "n\030\002 \001(\t\022\016\n\006status\030\003 \001(\t\022\037\n\027number_of_not" +
-      "ifications\030\004 \001(\005\"0\n\016RequestMessage\022\014\n\004te" +
-      "xt\030\001 \001(\t\022\020\n\010password\030\002 \001(\t\"!\n\017ResponseMe" +
-      "ssage\022\016\n\006length\030\001 \001(\0052\301\002\n\014Notification\022i" +
-      "\n\014Subscription\022*.ca.userAuthentication.S" +
-      "ubscriptionRequest\032+.ca.userAuthenticati" +
-      "on.SubscriptionResponse\"\000\022c\n\006Notify\022*.ca" +
-      ".userAuthentication.NotificationRequest\032" +
-      "+.ca.userAuthentication.NotificationResp" +
-      "onse\"\000\022a\n\016DoNotification\022%.ca.userAuthen" +
-      "tication.RequestMessage\032&.ca.userAuthent" +
-      "ication.ResponseMessage\"\000B&\n\017ca.notifica" +
-      "tionB\021NotificationProtoP\001b\006proto3"
+      "\t\"}\n\024NotificationResponse\022\031\n\021notificatio" +
+      "nEmail\030\001 \001(\t\022 \n\030notificationConfirmation" +
+      "\030\002 \001(\t\022\016\n\006status\030\003 \001(\t\022\030\n\020numNotificatio" +
+      "ns\030\004 \001(\005\"0\n\016RequestMessage\022\014\n\004text\030\001 \001(\t" +
+      "\022\020\n\010password\030\002 \001(\t\"!\n\017ResponseMessage\022\016\n" +
+      "\006length\030\001 \001(\0052\301\002\n\014Notification\022i\n\014Subscr" +
+      "iption\022*.ca.userAuthentication.Subscript" +
+      "ionRequest\032+.ca.userAuthentication.Subsc" +
+      "riptionResponse\"\000\022c\n\006Notify\022*.ca.userAut" +
+      "hentication.NotificationRequest\032+.ca.use" +
+      "rAuthentication.NotificationResponse\"\000\022a" +
+      "\n\016DoNotification\022%.ca.userAuthentication" +
+      ".RequestMessage\032&.ca.userAuthentication." +
+      "ResponseMessage\"\000B&\n\017ca.notificationB\021No" +
+      "tificationProtoP\001b\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -109,7 +109,7 @@ public final class NotificationProto {
     internal_static_ca_userAuthentication_NotificationResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_ca_userAuthentication_NotificationResponse_descriptor,
-        new java.lang.String[] { "NotificationEmail", "NotificationConfirmation", "Status", "NumberOfNotifications", });
+        new java.lang.String[] { "NotificationEmail", "NotificationConfirmation", "Status", "NumNotifications", });
     internal_static_ca_userAuthentication_RequestMessage_descriptor =
       getDescriptor().getMessageTypes().get(4);
     internal_static_ca_userAuthentication_RequestMessage_fieldAccessorTable = new

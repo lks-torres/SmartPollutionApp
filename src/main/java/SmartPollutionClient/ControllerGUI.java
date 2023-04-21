@@ -351,16 +351,15 @@ public class ControllerGUI implements ActionListener{
 	                NotificationGrpc.NotificationBlockingStub notificationStub = NotificationGrpc.newBlockingStub(channel);
 
 	                // Check if email is subscribed
-	                SubscriptionRequest subscriptionRequest = SubscriptionRequest.newBuilder().setSubscriptionEmail(email).build();
-	                SubscriptionResponse subscriptionResponse = notificationStub.subscription(subscriptionRequest);
-	                String subscribedEmails = subscriptionResponse.getSubscriptionConfirmation();
-	                if (!subscribedEmails.contains(email)) {
+	                if (!Server.getInstance().isSubscribed(email)) {
 	                    JOptionPane.showMessageDialog(null, "Email not subscribed");
 	                    return;
 	                }
 
-	                // Generate random number of notifications between 0 and 12 (inclusive)
-	                int numNotifications = new Random().nextInt(13);
+	                // Get the number of notifications received for the email
+	                NotificationRequest notificationRequest = NotificationRequest.newBuilder().setNotificationEmail(email).build();
+	                NotificationResponse notificationResponse = notificationStub.notify(notificationRequest);
+	                int numNotifications = notificationResponse.getNumberOfNotifications();
 
 	                // Display notification message
 	                JOptionPane.showMessageDialog(null, String.format("You have received %d notification(s), please check for email from notification@smartpollution.ie", numNotifications));

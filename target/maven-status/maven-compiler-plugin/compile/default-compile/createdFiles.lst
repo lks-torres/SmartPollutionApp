@@ -36,6 +36,7 @@ ca\userAuthentication\userAuthenticationProto.class
 ca\pollutionData\GetReadingsRequest.class
 ca\notification\RequestMessage$Builder.class
 ca\notification\SubscriptionRequest.class
+ca\pollutionData\PollutionDataServer.class
 ca\notification\NotificationGrpc$NotificationBaseDescriptorSupplier.class
 ca\userAuthentication\LogoutStatus.class
 ca\userAuthentication\ResponseMessageOrBuilder.class

@@ -19,7 +19,7 @@ private static final long serialVersionUID = 0L;
     notificationEmail_ = "";
     notificationConfirmation_ = "";
     status_ = "";
-    numberOfNotifications_ = 0;
+    numNotifications_ = 0;
   }
 
   @java.lang.Override
@@ -66,7 +66,7 @@ private static final long serialVersionUID = 0L;
           }
           case 32: {
 
-            numberOfNotifications_ = input.readInt32();
+            numNotifications_ = input.readInt32();
             break;
           }
           default: {
@@ -203,13 +203,13 @@ private static final long serialVersionUID = 0L;
     }
   }
 
-  public static final int NUMBER_OF_NOTIFICATIONS_FIELD_NUMBER = 4;
-  private int numberOfNotifications_;
+  public static final int NUMNOTIFICATIONS_FIELD_NUMBER = 4;
+  private int numNotifications_;
   /**
-   * <code>int32 number_of_notifications = 4;</code>
+   * <code>int32 numNotifications = 4;</code>
    */
-  public int getNumberOfNotifications() {
-    return numberOfNotifications_;
+  public int getNumNotifications() {
+    return numNotifications_;
   }
 
   private byte memoizedIsInitialized = -1;
@@ -235,8 +235,8 @@ private static final long serialVersionUID = 0L;
     if (!getStatusBytes().isEmpty()) {
       com.google.protobuf.GeneratedMessageV3.writeString(output, 3, status_);
     }
-    if (numberOfNotifications_ != 0) {
-      output.writeInt32(4, numberOfNotifications_);
+    if (numNotifications_ != 0) {
+      output.writeInt32(4, numNotifications_);
     }
     unknownFields.writeTo(output);
   }
@@ -256,9 +256,9 @@ private static final long serialVersionUID = 0L;
     if (!getStatusBytes().isEmpty()) {
       size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, status_);
     }
-    if (numberOfNotifications_ != 0) {
+    if (numNotifications_ != 0) {
       size += com.google.protobuf.CodedOutputStream
-        .computeInt32Size(4, numberOfNotifications_);
+        .computeInt32Size(4, numNotifications_);
     }
     size += unknownFields.getSerializedSize();
     memoizedSize = size;
@@ -282,8 +282,8 @@ private static final long serialVersionUID = 0L;
         .equals(other.getNotificationConfirmation());
     result = result && getStatus()
         .equals(other.getStatus());
-    result = result && (getNumberOfNotifications()
-        == other.getNumberOfNotifications());
+    result = result && (getNumNotifications()
+        == other.getNumNotifications());
     result = result && unknownFields.equals(other.unknownFields);
     return result;
   }
@@ -301,8 +301,8 @@ private static final long serialVersionUID = 0L;
     hash = (53 * hash) + getNotificationConfirmation().hashCode();
     hash = (37 * hash) + STATUS_FIELD_NUMBER;
     hash = (53 * hash) + getStatus().hashCode();
-    hash = (37 * hash) + NUMBER_OF_NOTIFICATIONS_FIELD_NUMBER;
-    hash = (53 * hash) + getNumberOfNotifications();
+    hash = (37 * hash) + NUMNOTIFICATIONS_FIELD_NUMBER;
+    hash = (53 * hash) + getNumNotifications();
     hash = (29 * hash) + unknownFields.hashCode();
     memoizedHashCode = hash;
     return hash;
@@ -442,7 +442,7 @@ private static final long serialVersionUID = 0L;
 
       status_ = "";
 
-      numberOfNotifications_ = 0;
+      numNotifications_ = 0;
 
       return this;
     }
@@ -473,7 +473,7 @@ private static final long serialVersionUID = 0L;
       result.notificationEmail_ = notificationEmail_;
       result.notificationConfirmation_ = notificationConfirmation_;
       result.status_ = status_;
-      result.numberOfNotifications_ = numberOfNotifications_;
+      result.numNotifications_ = numNotifications_;
       onBuilt();
       return result;
     }
@@ -534,8 +534,8 @@ private static final long serialVersionUID = 0L;
         status_ = other.status_;
         onChanged();
       }
-      if (other.getNumberOfNotifications() != 0) {
-        setNumberOfNotifications(other.getNumberOfNotifications());
+      if (other.getNumNotifications() != 0) {
+        setNumNotifications(other.getNumNotifications());
       }
       this.mergeUnknownFields(other.unknownFields);
       onChanged();
@@ -773,28 +773,28 @@ private static final long serialVersionUID = 0L;
       return this;
     }
 
-    private int numberOfNotifications_ ;
+    private int numNotifications_ ;
     /**
-     * <code>int32 number_of_notifications = 4;</code>
+     * <code>int32 numNotifications = 4;</code>
      */
-    public int getNumberOfNotifications() {
-      return numberOfNotifications_;
+    public int getNumNotifications() {
+      return numNotifications_;
     }
     /**
-     * <code>int32 number_of_notifications = 4;</code>
+     * <code>int32 numNotifications = 4;</code>
      */
-    public Builder setNumberOfNotifications(int value) {
+    public Builder setNumNotifications(int value) {
       
-      numberOfNotifications_ = value;
+      numNotifications_ = value;
       onChanged();
       return this;
     }
     /**
-     * <code>int32 number_of_notifications = 4;</code>
+     * <code>int32 numNotifications = 4;</code>
      */
-    public Builder clearNumberOfNotifications() {
+    public Builder clearNumNotifications() {
       
-      numberOfNotifications_ = 0;
+      numNotifications_ = 0;
       onChanged();
       return this;
     }

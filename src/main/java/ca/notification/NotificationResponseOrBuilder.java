@@ -38,7 +38,7 @@ public interface NotificationResponseOrBuilder extends
       getStatusBytes();
 
   /**
-   * <code>int32 number_of_notifications = 4;</code>
+   * <code>int32 numNotifications = 4;</code>
    */
-  int getNumberOfNotifications();
+  int getNumNotifications();
 }

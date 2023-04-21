@@ -1,18 +1,25 @@
 package ca.notification;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
 import io.grpc.stub.StreamObserver;
 
-public class NotificationServer extends NotificationGrpc.NotificationImplBase {
+import ca.notification.NotificationGrpc.NotificationImplBase;
+
+public class NotificationServer extends NotificationImplBase {
     public static List<String> subscribedEmails = new ArrayList<String>();
+    public static final String EMAIL_FILE = "C:\\Users\\lucas\\eclipse-workspace\\SmartPollution\\src\\main\\java\\ca\\notification\\subscribed_emails.csv";
 
     public static void main(String args[]) throws IOException, InterruptedException {
+        readSubscribedEmails();
+        
         Server server = ServerBuilder.forPort(8080)
                 .addService(new NotificationServer())
                 .build();
@@ -27,13 +34,18 @@ public class NotificationServer extends NotificationGrpc.NotificationImplBase {
 
         server.awaitTermination();
     }
+    
     @Override
     public void subscription(SubscriptionRequest request, StreamObserver<SubscriptionResponse> responseObserver) {
         String subscriptionConfirmation;
         if (isValidEmail(request.getSubscriptionEmail())) {
-            subscribedEmails.add(request.getSubscriptionEmail());
-            subscriptionConfirmation = "Subscribed email " + request.getSubscriptionEmail();
-            printSubscribedEmails();
+            if (isSubscribed(request.getSubscriptionEmail())) {
+                subscriptionConfirmation = "Email already subscribed";
+            } else {
+                subscribedEmails.add(request.getSubscriptionEmail());
+                subscriptionConfirmation = "Subscription Confirmed";
+                writeSubscribedEmail(request.getSubscriptionEmail());
+            }
         } else {
             subscriptionConfirmation = "Invalid email address " + request.getSubscriptionEmail();
         }
@@ -47,13 +59,18 @@ public class NotificationServer extends NotificationGrpc.NotificationImplBase {
     @Override
     public void notify(NotificationRequest request, StreamObserver<NotificationResponse> responseObserver) {
         String notificationEmail = request.getNotificationEmail();
-            String notificationMessage = String.format("You have received %d notification(s), please check for emails from notification@smartpollution.ie");
-            NotificationResponse response = NotificationResponse.newBuilder()
-                    .setNotificationEmail(notificationEmail)
-                    .setNotificationConfirmation(notificationMessage)
-                    .build();
-            responseObserver.onNext(response);
-            responseObserver.onCompleted();
+        String notificationMessage;
+        if (isSubscribed(notificationEmail)) {
+            notificationMessage = String.format("You have received %d notification(s), please check for emails from notification@smartpollution.ie", request.getNotificationEmail());
+        } else {
+            notificationMessage = "You are not subscribed to receive notifications";
+        }
+        NotificationResponse response = NotificationResponse.newBuilder()
+                .setNotificationEmail(notificationEmail)
+                .setNotificationConfirmation(notificationMessage)
+                .build();
+        responseObserver.onNext(response);
+        responseObserver.onCompleted();
     }
 
     @Override
@@ -66,6 +83,42 @@ public class NotificationServer extends NotificationGrpc.NotificationImplBase {
         responseObserver.onCompleted();
     }
 
+    private static void readSubscribedEmails() throws IOException {
+        BufferedReader reader = new BufferedReader(new FileReader(EMAIL_FILE));
+        String line;
+        while ((line = reader.readLine()) != null) {
+            subscribedEmails.add(line.trim());
+        }
+        reader.close();
+    }
+
+    private void writeSubscribedEmail(String email) {
+        try {
+            FileWriter writer = new FileWriter(EMAIL_FILE, true);
+            writer.write(email + "\n");
+            writer.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private boolean isSubscribed(String email) {
+        try {
+            BufferedReader reader = new BufferedReader(new FileReader(EMAIL_FILE));
+            String line;
+            while ((line = reader.readLine()) != null) {
+                if (line.trim().equals(email)) {
+                    reader.close();
+                    return true;
+                }
+            }
+            reader.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+    
     private boolean isValidEmail(String email) {
         // Validate email address
         if (email == null || email.isEmpty()) {
@@ -84,13 +137,11 @@ public class NotificationServer extends NotificationGrpc.NotificationImplBase {
     }
 
     private void printSubscribedEmails() {
-    	System.out.println("Subscribed Emails:");
+        System.out.println("Subscribed Emails:");
         if(subscribedEmails.isEmpty()){
-        	System.out.println("No subscribed emails yet.");
+            System.out.println("No subscribed emails yet.");
         }else {
-            System.out.println("Subscribed Emails:");
             System.out.println(subscribedEmails);
         }
-
-        }
     }
+   }

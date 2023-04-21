@@ -28,7 +28,7 @@ message NotificationResponse {
   string notificationEmail = 1;
   string notificationConfirmation = 2;
   string status = 3;
-  int32 number_of_notifications = 4;
+  int32 numNotifications  = 4;
 }
 
 message RequestMessage {
