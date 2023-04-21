@@ -6,6 +6,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
@@ -55,13 +56,13 @@ public class NotificationServer extends NotificationImplBase {
         responseObserver.onNext(response);
         responseObserver.onCompleted();
     }
-
     @Override
     public void notify(NotificationRequest request, StreamObserver<NotificationResponse> responseObserver) {
         String notificationEmail = request.getNotificationEmail();
         String notificationMessage;
         if (isSubscribed(notificationEmail)) {
-            notificationMessage = String.format("You have received %d notification(s), please check for emails from notification@smartpollution.ie", request.getNotificationEmail());
+            int numNotifications = new Random().nextInt(12) + 1; // generate random number between 1 and 12 (inclusive)
+            notificationMessage = String.format("You have received %d notification(s). Please check for emails from notification@smartpollution.ie", numNotifications);
         } else {
             notificationMessage = "You are not subscribed to receive notifications";
         }
@@ -72,7 +73,6 @@ public class NotificationServer extends NotificationImplBase {
         responseObserver.onNext(response);
         responseObserver.onCompleted();
     }
-
     @Override
     public void doNotification(RequestMessage request, StreamObserver<ResponseMessage> responseObserver) {
         int length = request.getText().length();

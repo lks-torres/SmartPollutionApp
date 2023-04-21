@@ -32,6 +32,7 @@ import java.util.Random;
 import java.util.Scanner;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
+import io.grpc.Server;
 import io.grpc.StatusRuntimeException;
 	
 public class ControllerGUI implements ActionListener{
@@ -340,38 +341,31 @@ public class ControllerGUI implements ActionListener{
 	            }
 	        }
 	        else if (label.equals("Check Notification Received")) {
-	            // Get the email address from the notificationEmail text field
-	            String email = notificationEmail.getText();
+	        	String email = notificationEmail.getText();
 
-	            // Establish channel
-	            ManagedChannel channel = ManagedChannelBuilder.forAddress("localhost", 8080).usePlaintext().build();
+	        	// Establish channel
+	        	ManagedChannel channel = ManagedChannelBuilder.forAddress("localhost", 8080).usePlaintext().build();
 
-	            try {
-	                // Create stub
-	                NotificationGrpc.NotificationBlockingStub notificationStub = NotificationGrpc.newBlockingStub(channel);
+	        	try {
+	        	    // Create stub
+	        	    NotificationGrpc.NotificationBlockingStub notificationStub = NotificationGrpc.newBlockingStub(channel);
 
-	                // Check if email is subscribed
-	                if (!Server.getInstance().isSubscribed(email)) {
-	                    JOptionPane.showMessageDialog(null, "Email not subscribed");
-	                    return;
-	                }
+	        	    // Call notify method and get response
+	        	    NotificationRequest notificationRequest = NotificationRequest.newBuilder().setNotificationEmail(email).build();
+	        	    NotificationResponse notificationResponse = notificationStub.notify(notificationRequest);
 
-	                // Get the number of notifications received for the email
-	                NotificationRequest notificationRequest = NotificationRequest.newBuilder().setNotificationEmail(email).build();
-	                NotificationResponse notificationResponse = notificationStub.notify(notificationRequest);
-	                int numNotifications = notificationResponse.getNumberOfNotifications();
+	        	    // Display notification message
+	        	    String notificationMessage = notificationResponse.getNotificationConfirmation();
+	        	    JOptionPane.showMessageDialog(null, notificationMessage);
 
-	                // Display notification message
-	                JOptionPane.showMessageDialog(null, String.format("You have received %d notification(s), please check for email from notification@smartpollution.ie", numNotifications));
-
-	            } catch (Exception ex) {
-	                // Handle any exceptions that may occur
-	                System.err.println("Error: " + ex.getMessage());
-	            } finally {
-	                // Shutdown channel
-	                channel.shutdown();
-	            }
-	        }
+	        	} catch (Exception ex) {
+	        	    // Handle any exceptions that may occur
+	        	    System.err.println("Error: " + ex.getMessage());
+	        	} finally {
+	        	    // Shutdown channel
+	        	    channel.shutdown();
+	        	}
+		}
 	        else if (label.equals("Get Data")) {
 	            System.out.println("Pollution Data Service to be invoked...");
 
