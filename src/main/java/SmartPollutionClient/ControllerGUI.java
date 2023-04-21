@@ -13,6 +13,8 @@ import ca.pollutionData.GetMonthIndexRequest;
 import ca.pollutionData.GetMonthIndexResponse;
 import ca.pollutionData.GetReadingsRequest;
 import ca.pollutionData.GetReadingsResponse;
+import ca.pollutionData.GetStatisticsRequest;
+import ca.pollutionData.GetStatisticsResponse;
 import ca.pollutionData.PollutionDataServiceGrpc;
 import ca.userAuthentication.LoginRequest;
 import ca.userAuthentication.LoginResponse;
@@ -94,11 +96,6 @@ public class ControllerGUI implements ActionListener{
         button.addActionListener(this);
         panel.add(button);
         panel.add(Box.createRigidArea(new Dimension(10, 0)));
-
-        logout = new JPasswordField("", 10);
-        logout.setEditable(false);
-        panel.add(logout);
-
         panel.setLayout(boxlayout);
 
         return panel;
@@ -177,11 +174,6 @@ public class ControllerGUI implements ActionListener{
         button.addActionListener(this);
         panel.add(button);
         panel.add(Box.createRigidArea(new Dimension(10, 0)));
-
-        pollutionData = new JTextField("", 10);
-        pollutionData.setEditable(false);
-        panel.add(pollutionData);
-
         panel.setLayout(boxlayout);
 
         return panel;
@@ -197,7 +189,7 @@ public class ControllerGUI implements ActionListener{
 
 		private void build() { 
 
-		    JFrame frame = new JFrame("Service Controller Sample");
+		    JFrame frame = new JFrame("Smart Pollution Application");
 		    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
 		    // Set the panel to add buttons
@@ -401,18 +393,18 @@ public class ControllerGUI implements ActionListener{
 	            GetMonthIndexResponse indexResponse = blockingStub.getMonthIndex(indexRequest);
 	            int month = indexResponse.getMonthIndex();
 	            if (month == -1) {
-	                pollutionData.setText("Invalid month entered");
+	            	JOptionPane.showMessageDialog(null,"Invalid month entered");
 	                return;
 	            }
-	            GetReadingsRequest request = GetReadingsRequest.newBuilder()
+	            GetReadingsRequest readingsRequest = GetReadingsRequest.newBuilder()
 	                    .setArea(area)
 	                    .setMonth(month)
 	                    .build();
 
 	            // Retrieve the response from the server
-	            GetReadingsResponse response;
+	            GetReadingsResponse readingsResponse;
 	            try {
-	                response = blockingStub.getReadings(request);
+	                readingsResponse = blockingStub.getReadings(readingsRequest);
 	            } catch (StatusRuntimeException e1) {
 	                pollutionData.setText("Error communicating with server: " + e1.getStatus().getDescription());
 	                return;
@@ -423,28 +415,70 @@ public class ControllerGUI implements ActionListener{
 	            float waterPollution = 0.0f;
 	            switch (area) {
 	                case "Dublin":
-	                    airPollution = response.getDublinAirPollution();
-	                    waterPollution = response.getDublinWaterPollution();
+	                    airPollution = readingsResponse.getDublinAirPollution();
+	                    waterPollution = readingsResponse.getDublinWaterPollution();
 	                    break;
 	                case "Cork":
-	                    airPollution = response.getCorkAirPollution();
-	                    waterPollution = response.getCorkWaterPollution();
+	                    airPollution = readingsResponse.getCorkAirPollution();
+	                    waterPollution = readingsResponse.getCorkWaterPollution();
 	                    break;
 	                default:
-	                    pollutionData.setText("Invalid area entered");
+	                	JOptionPane.showMessageDialog(null,"Invalid area entered");
 	                    return;
 	            }
 	            
-	            // Create a new text area to display the pollution data
-	            JTextArea responseTextArea = new JTextArea("Air Pollution: " + airPollution + ", Water Pollution: " + waterPollution);
+	            // Prepare the request message to get statistics
+	            GetStatisticsRequest statisticsRequest = GetStatisticsRequest.newBuilder()
+	                    .setArea(area)
+	                    .build();
+
+	            // Retrieve the response from the server
+	            GetStatisticsResponse statisticsResponse;
+	            try {
+	                statisticsResponse = blockingStub.getStatistics(statisticsRequest);
+	            } catch (StatusRuntimeException e2) {
+	                pollutionData.setText("Error communicating with server: " + e2.getStatus().getDescription());
+	                return;
+	            }
+
+	         // Create a new text area to display the pollution data
+	            JTextArea responseTextArea = new JTextArea("Pollution data for: "+ area + " in " + monthName + " Air Pollution: " + airPollution + ", Water Pollution: " + waterPollution);
 	            responseTextArea.setEditable(false);
 	            responseTextArea.setLineWrap(true);
 	            responseTextArea.setWrapStyleWord(true);
-	            
-	            // Add the response text area to a scroll pane and display it in a separate dialog box
-	            JScrollPane scrollPane = new JScrollPane(responseTextArea);
-	            scrollPane.setPreferredSize(new Dimension(400, 200));
-	            JOptionPane.showMessageDialog(null, scrollPane, "Pollution Data Response", JOptionPane.PLAIN_MESSAGE);
+
+	            // Display the pollution statistics in the UI
+	            float averageAirPollution = statisticsResponse.getAverageAirPollution();
+	            float minimumAirPollution = statisticsResponse.getMinimumAirPollution();
+	            float maximumAirPollution = statisticsResponse.getMaximumAirPollution();
+	            float averageWaterPollution = statisticsResponse.getAverageWaterPollution();
+	            float minimumWaterPollution = statisticsResponse.getMinimumWaterPollution();
+	            float maximumWaterPollution = statisticsResponse.getMaximumWaterPollution();
+	            String statisticsMessage = "Air and Water Pollution Statistic for " + area + " in 2022" + "\n" +
+	            						   "Air Pollution:\n" +
+	                                       " - Average: " + averageAirPollution + "\n" +
+	                                       " - Minimum: " + minimumAirPollution + "\n" +
+	                                       " - Maximum: " + maximumAirPollution + "\n" +
+	                                       "Water Pollution:\n" +
+	                                       " - Average: " + averageWaterPollution + "\n" +
+	                                       " - Minimum: " + minimumWaterPollution + "\n" +
+	                                       " - Maximum: " + maximumWaterPollution;
+	            JTextArea statisticsTextArea = new JTextArea();
+	            statisticsTextArea.setText(statisticsMessage);
+	            statisticsTextArea.setEditable(false);
+
+	            // Create a panel to display both the pollution data and statistics
+	            JPanel panel = new JPanel(new GridLayout(2, 1));
+	            panel.add(new JScrollPane(responseTextArea, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED));
+	            panel.add(new JScrollPane(statisticsTextArea, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED));
+
+	            // Set the preferred size of the scroll panes
+	            Dimension scrollPaneSize = new Dimension(500, 250);
+	            panel.getComponent(0).setPreferredSize(scrollPaneSize);
+	            panel.getComponent(1).setPreferredSize(scrollPaneSize);
+
+	            // Display the panel in a separate dialog box
+	            JOptionPane.showMessageDialog(null, panel, "Pollution Data and Statistics", JOptionPane.PLAIN_MESSAGE, null);
 
 	            // Close the channel
 	            channel.shutdown();
